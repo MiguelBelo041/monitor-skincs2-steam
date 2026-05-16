@@ -1,0 +1,86 @@
+# Postgres (imagem Supabase) + Postgres Meta + Studio (UI web).
+# Porta host Postgres: 55432 (ajuste DATABASE_URL se mudar).
+# Studio: http://127.0.0.1:54330
+#
+# Subir:   docker compose up -d
+# Parar:   docker compose down
+# Logs:    docker compose logs -f studio
+
+name: projetonotf-supabase-local
+
+services:
+  supabase-db:
+    image: supabase/postgres:15.8.1.073
+    container_name: supabase-local-db
+    restart: unless-stopped
+    ports:
+      - "60200:5432"
+    environment:
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: postgres
+      POSTGRES_USER: postgres
+    volumes:
+      - supabase_db_data:/var/lib/postgresql/data
+      - ./docker/init.sql:/docker-entrypoint-initdb.d/01-init.sql:ro
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres -d postgres"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  meta:
+    image: supabase/postgres-meta:v0.96.3
+    container_name: supabase-meta-local
+    restart: unless-stopped
+    depends_on:
+      supabase-db:
+        condition: service_healthy
+    environment:
+      PG_META_PORT: 8080
+      PG_META_DB_HOST: supabase-db
+      PG_META_DB_PORT: 5432
+      PG_META_DB_NAME: postgres
+      PG_META_DB_USER: supabase_admin
+      PG_META_DB_PASSWORD: postgres
+      CRYPTO_KEY: "devmeta01234567890123456789012345678901234567890123456789012"
+    expose:
+      - "8080"
+
+  studio:
+    image: supabase/studio:latest
+    container_name: supabase-studio-local
+    restart: unless-stopped
+    ports:
+      - "54330:3000"
+    depends_on:
+      - meta
+    environment:
+      HOSTNAME: "0.0.0.0"
+      STUDIO_PG_META_URL: http://meta:8080
+      POSTGRES_HOST: supabase-db
+      POSTGRES_PORT: "5432"
+      POSTGRES_DB: postgres
+      POSTGRES_USER: supabase_admin
+      POSTGRES_PASSWORD: postgres
+      PG_META_CRYPTO_KEY: "devmeta01234567890123456789012345678901234567890123456789012"
+      DEFAULT_ORGANIZATION_NAME: Local
+      DEFAULT_PROJECT_NAME: projetonotf
+      SUPABASE_URL: http://127.0.0.1:54330
+      SUPABASE_PUBLIC_URL: http://127.0.0.1:54330
+      SUPABASE_ANON_KEY: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZS1kZW1vIiwicm9sZSI6ImFub24iLCJleHAiOjE5ODM4MTI5OTZ9.CRXP1A7WOeoJeXxjNni43kdQwgnWNReilDMblYTn_I0"
+      SUPABASE_SERVICE_KEY: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZS1kZW1vIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImV4cCI6MTk4MzgxMjk5Nn0.EGIM96RAZx35lJzdJsyH-qQwv8Hdp7fsn3W0YpN81IU"
+      AUTH_JWT_SECRET: "super-secret-jwt-token-with-at-least-32-characters-long"
+      LOGFLARE_URL: ""
+      LOGFLARE_PUBLIC_ACCESS_TOKEN: ""
+      LOGFLARE_PRIVATE_ACCESS_TOKEN: ""
+      NEXT_PUBLIC_ENABLE_LOGS: "false"
+      NEXT_ANALYTICS_BACKEND_PROVIDER: postgres
+      # Studio recente exige estas pastas (stack self-hosted completo)
+      SNIPPETS_MANAGEMENT_FOLDER: /app/snippets
+      EDGE_FUNCTIONS_MANAGEMENT_FOLDER: /app/edge-functions
+    volumes:
+      - ./docker/volumes/studio/snippets:/app/snippets
+      - ./docker/volumes/studio/edge-functions:/app/edge-functions
+
+volumes:
+  supabase_db_data:

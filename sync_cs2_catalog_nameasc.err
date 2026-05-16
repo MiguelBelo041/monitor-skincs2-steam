@@ -1,0 +1,11 @@
+Traceback (most recent call last):
+  File "C:\Users\miguel.belo\Documents\projetonotf\scripts\sync_cs2_catalog.py", line 324, in <module>
+    raise SystemExit(main())
+                     ~~~~^^
+  File "C:\Users\miguel.belo\Documents\projetonotf\scripts\sync_cs2_catalog.py", line 320, in main
+    return sync(args)
+  File "C:\Users\miguel.belo\Documents\projetonotf\scripts\sync_cs2_catalog.py", line 212, in sync
+    data = fetch_page(start_offset, 100)
+  File "C:\Users\miguel.belo\Documents\projetonotf\scripts\sync_cs2_catalog.py", line 77, in fetch_page
+    raise requests.HTTPError(f"429 Too Many Requests apos {max_retries} esperas (start={start})")
+requests.exceptions.HTTPError: 429 Too Many Requests apos 12 esperas (start=13460)

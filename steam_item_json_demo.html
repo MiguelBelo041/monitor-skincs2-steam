@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Steam Market — JSON de um item</title>
+  <style>
+    body { font-family: system-ui, sans-serif; max-width: 720px; margin: 2rem auto; padding: 0 1rem; line-height: 1.5; }
+    code, pre { background: #1e1e1e; color: #d4d4d4; padding: 0.15rem 0.4rem; border-radius: 4px; font-size: 0.88rem; word-break: break-all; }
+    pre { padding: 1rem; overflow-x: auto; }
+    a.btn { display: inline-block; margin-top: 0.5rem; padding: 0.5rem 1rem; background: #1b9aaa; color: #fff; text-decoration: none; border-radius: 6px; }
+    a.btn:hover { filter: brightness(1.08); }
+    .muted { color: #555; font-size: 0.92rem; }
+    h2 { margin-top: 2rem; font-size: 1.1rem; }
+  </style>
+</head>
+<body>
+  <h1>Ver JSON da Steam no Chrome</h1>
+
+  <p><strong>Um item só (preços resumidos)</strong> — endpoint oficial do Community Market, resposta JSON:</p>
+  <p><code>/market/priceoverview/</code> com <code>appid</code>, <code>currency</code> e <code>market_hash_name</code>.</p>
+  <ul>
+    <li><code>currency=7</code> → real (BRL)</li>
+    <li>O nome do item deve estar URL-encoded (espaços → <code>%20</code>, <code>|</code>, <code>★</code>, etc.)</li>
+  </ul>
+
+  <h2>Exemplo 1 — Case “Dreams & Nightmares Case”</h2>
+  <pre id="link1"></pre>
+  <a class="btn" id="btn1" href="#" target="_blank" rel="noopener">Abrir no Chrome (nova aba)</a>
+
+  <h2>Exemplo 2 — Luva (nome longo)</h2>
+  <pre id="link2"></pre>
+  <a class="btn" id="btn2" href="#" target="_blank" rel="noopener">Abrir no Chrome</a>
+
+  <h2>Alternativa — lista/search (vários campos por linha)</h2>
+  <p class="muted"><code>/market/search/render/</code> com <code>norender=1</code> devolve JSON com array <code>results</code> (não é “um item por URL fixa”, mas mostra o objeto completo do item na busca).</p>
+  <pre id="link3"></pre>
+  <a class="btn" id="btn3" href="#" target="_blank" rel="noopener">Abrir busca (primeira página)</a>
+
+  <p class="muted" style="margin-top:2rem;">Se o Chrome pedir para descarregar ou mostrar texto simples, é normal — o corpo é JSON. Podes instalar extensão “JSON Formatter” para formatar.</p>
+
+  <script>
+    const basePrice = "https://steamcommunity.com/market/priceoverview/";
+    const q1 = new URLSearchParams({
+      appid: "730",
+      currency: "7",
+      market_hash_name: "Dreams & Nightmares Case",
+    });
+    const q2 = new URLSearchParams({
+      appid: "730",
+      currency: "7",
+      market_hash_name: "\u2605 Driver Gloves | Seigaiha (Field-Tested)",
+    });
+
+    const url1 = basePrice + "?" + q1.toString();
+    const url2 = basePrice + "?" + q2.toString();
+
+    document.getElementById("link1").textContent = url1;
+    document.getElementById("btn1").href = url1;
+
+    document.getElementById("link2").textContent = url2;
+    document.getElementById("btn2").href = url2;
+
+    const searchParams = new URLSearchParams({
+      appid: "730",
+      start: "0",
+      count: "10",
+      norender: "1",
+      search_descriptions: "0",
+      sort_column: "popular",
+      sort_dir: "desc",
+    });
+    const url3 = "https://steamcommunity.com/market/search/render/?" + searchParams.toString();
+    document.getElementById("link3").textContent = url3;
+    document.getElementById("btn3").href = url3;
+  </script>
+</body>
+</html>
